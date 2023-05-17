@@ -1,0 +1,71 @@
+version: '3'
+
+# 實作 consul 註冊中心的集群設定
+
+services:
+  # 容器服務名稱
+  consul1:
+    # 鏡像名稱
+    image: cap1573/consul
+    # 容器名稱
+    container_name: node1
+    # 開啟後運行指令，開啟server模式 
+    command:  agent --server -bootstrap-expect=3 -node=node1 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1
+  # consul2:
+  #   image: cap1573/consul
+  #   container_name: node2
+  #   command:  agent --server -retry-join=node1 -bootstrap-expect=3 -node=node2 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1
+  #   depends_on:
+  #     - consul1
+  # consul3:
+  #   image: cap1573/consul
+  #   container_name: node3
+  #   command:  agent --server -retry-join=node1 -bootstrap-expect=3 -node=node3 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1
+  #   depends_on:
+  #     - consul1
+  # 對外暴露節點，控制面板
+  consul-ui:
+    image: consul
+    container_name: node-ui
+    command:  agent -retry-join=node1 -node=node4 -bind=0.0.0.0 -client=0.0.0.0 -ui
+    # depends_on:
+    #   - consul2
+    #   - consul3
+    ports:
+      - 8500:8500
+  # # 資料庫容器
+  # PaaS-mysql:
+  #   image: cap1573/mysql:5.6
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #   container_name: PaaS-mysql
+  #   ports:
+  #     - "3306:3306"
+  #   # 資料掛載在local，避免容器關掉資料消失
+  #   volumes:
+  #     - ./mysql:/var/lib/mysql
+  # # jaeger鏈路追中Server
+  # jaeger:
+  #   image: cap1573/jaeger
+  #   container_name: jaeger
+  #   ports:
+  #     - "6831:6831/udp"
+  #     - "16686:16686"
+  # # 熔斷介面
+  # hystrix-dashboard:
+  #   image: cap1573/hystrix-dashboard
+  #   container_name: hystrix-dashboard
+  #   ports:
+  #     - "9002:9002"
+  # # 監控鏡像
+  # prometheus:
+  #   image: cap1573/prometheus
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  # # 監控看板，帳密admin/admin
+  # grafana:
+  #   image: cap1573/grafana
+  #   ports:
+  #     - "3000:3000"
