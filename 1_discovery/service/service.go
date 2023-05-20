@@ -1,8 +1,8 @@
 package service
 
 import (
-	"ch6-discovery/config"
-	"ch6-discovery/discover"
+	"1_discovery/config"
+	"1_discovery/discover"
 	"context"
 	"errors"
 )

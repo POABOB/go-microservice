@@ -12,7 +12,7 @@ import (
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
 
-	endpoints "ch6-discovery/endpoint"
+	endpoints "1_discovery/endpoint"
 )
 
 var (

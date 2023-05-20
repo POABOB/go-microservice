@@ -1,11 +1,11 @@
 package main
 
 import (
-	"ch6-discovery/config"
-	"ch6-discovery/discover"
-	"ch6-discovery/endpoint"
-	"ch6-discovery/service"
-	"ch6-discovery/transport"
+	"1_discovery/config"
+	"1_discovery/discover"
+	"1_discovery/endpoint"
+	"1_discovery/service"
+	"1_discovery/transport"
 	"context"
 	"flag"
 	"fmt"

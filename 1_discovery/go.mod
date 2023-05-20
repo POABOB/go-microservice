@@ -1,4 +1,4 @@
-module ch6-discovery
+module 1_discovery
 
 go 1.19
 
