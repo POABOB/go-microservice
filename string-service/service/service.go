@@ -69,5 +69,5 @@ func (s StringService) HealthCheck() bool {
 	return true
 }
 
-// ServiceMiddleware define service middleware
+// ServiceMiddleware 注入 log 的記錄行為
 type ServiceMiddleware func(Service) Service
