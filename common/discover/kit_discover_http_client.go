@@ -38,21 +38,6 @@ func NewKitHTTPDiscoverClient(consulHost string, consulPort int) (DiscoveryClien
 	}, err
 }
 
-func (consulClient *KitDiscoverClient) RegisterHTTP(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
-	return consulClient.Register(&api.AgentServiceRegistration{
-		ID:      instanceId,
-		Name:    serviceName,
-		Address: instanceHost,
-		Port:    instancePort,
-		Meta:    meta,
-		Check: &api.AgentServiceCheck{
-			DeregisterCriticalServiceAfter: "30s",
-			HTTP:                           "http://" + instanceHost + ":" + strconv.Itoa(instancePort) + healthCheckUrl,
-			Interval:                       "15s",
-		},
-	})
-}
-
 func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
 	// 服務實例的MetaData，呼叫註冊函數
 	err := consulClient.client.Register(&api.AgentServiceRegistration{
