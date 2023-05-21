@@ -1,6 +1,7 @@
 package discover
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -43,7 +44,7 @@ func (consulClient *KitGRPCDiscoverClient) Register(serviceName, instanceId, hea
 		Meta:    meta,
 		Check: &api.AgentServiceCheck{
 			DeregisterCriticalServiceAfter: "30s",
-			GRPC:                           instanceHost + ":" + strconv.Itoa(instancePort) + healthCheckUrl,
+			GRPC:                           fmt.Sprintf("%v:%v/%v", instanceHost, strconv.Itoa(instancePort), serviceName),
 			Interval:                       "15s",
 		},
 	})

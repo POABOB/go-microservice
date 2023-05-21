@@ -1,6 +1,7 @@
 package discover
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -48,7 +49,7 @@ func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, healthC
 		Meta:    meta,
 		Check: &api.AgentServiceCheck{
 			DeregisterCriticalServiceAfter: "30s",
-			HTTP:                           "http://" + instanceHost + ":" + strconv.Itoa(instancePort) + healthCheckUrl,
+			HTTP:                           fmt.Sprintf("http://%v:%v/%v", instanceHost, strconv.Itoa(instancePort), healthCheckUrl),
 			Interval:                       "15s",
 		},
 	})
