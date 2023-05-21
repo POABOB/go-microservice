@@ -1,0 +1,28 @@
+version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - "RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}"
+      - "RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}"
+      # - "RABBITMQ_DEFAULT_PASS=guest"
+      # - "RABBITMQ_DEFAULT_USER=guest"
+    volumes:
+      - ./.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+  # TODO
+  # spring-cloud-config-server:
+  #   image: poabob/spring-cloud-config-server:dev-1.0.0
+  #   build: 
+  #     context: ./.docker-conf/spring
+  #     dockerfile: Dockerfile
+  #     target: dev
+  #   container_name: spring-cloud-config-server
+  #   ports:
+  #     - 8888:8888
+  #   volumes:
+  #     - ./.docker-conf/spring/resources/:/spring-cloud-config-server/src/main/resources

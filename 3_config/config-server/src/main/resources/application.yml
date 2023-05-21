@@ -1,0 +1,31 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: config-server
+
+---
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/POABOB/go-microservice.git
+          searchPaths: ${APP_LOCATE:3_config/config/dev}
+          username: POABOB
+          password: '***'
+
+---
+spring:
+  rabbitmq:
+    host: 0.0.0.0
+    port: 5672
+    username: pass
+    password: '***'
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+encrypt:
+  key: '***'
