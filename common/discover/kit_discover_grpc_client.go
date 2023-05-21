@@ -34,7 +34,7 @@ func NewKitGRPCDiscoverClient(consulHost string, consulPort int) (DiscoveryClien
 	}, err
 }
 
-func (consulClient *KitGRPCDiscoverClient) Register(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
+func (consulClient *KitGRPCDiscoverClient) Register(serviceName, instanceId, instanceHost, healthCheckUrl string, instancePort int, meta map[string]string, logger *log.Logger) bool {
 	// 服務實例的MetaData，呼叫註冊函數
 	err := consulClient.KitDiscoverClient.client.Register(&api.AgentServiceRegistration{
 		ID:      instanceId,
@@ -48,6 +48,7 @@ func (consulClient *KitGRPCDiscoverClient) Register(serviceName, instanceId, hea
 			Interval:                       "15s",
 		},
 	})
+
 	if err != nil {
 		log.Printf("Register Service: %s Error, instanceId %s \n", serviceName, instanceId)
 		return false

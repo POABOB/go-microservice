@@ -39,7 +39,7 @@ func NewKitHTTPDiscoverClient(consulHost string, consulPort int) (DiscoveryClien
 	}, err
 }
 
-func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
+func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, instanceHost, healthCheckUrl string, instancePort int, meta map[string]string, logger *log.Logger) bool {
 	// 服務實例的MetaData，呼叫註冊函數
 	err := consulClient.client.Register(&api.AgentServiceRegistration{
 		ID:      instanceId,
