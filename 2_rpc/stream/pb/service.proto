@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package stream_pb;
+
+// 解決以下錯誤：
+// protoc-gen-go: unable to determine Go import path for "pb/service.proto"
+// Please specify either:
+//         • a "go_package" option in the .proto source file, or
+//         • a "M" argument on the command line.
+option go_package = "./"; 
+
+service StringService{
+    rpc Concat(StringRequest) returns (StringResponse) {}
+    rpc Diff(StringRequest) returns (StringResponse) {}
+    rpc LotsOfServerStream(StringRequest) returns (stream StringResponse) {}
+    rpc LotsOfClientStream(stream StringRequest) returns (StringResponse) {}
+    rpc LotsOfServerAndClientStream(stream StringRequest) returns (stream StringResponse) {}
+}
+
+message StringRequest {
+    string A = 1;
+    string B = 2;
+}
+
+message StringResponse {
+    string Ret = 1;
+    string err = 2;
+}
