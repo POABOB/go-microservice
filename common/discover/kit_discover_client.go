@@ -38,9 +38,8 @@ func NewKitDiscoverClient(consulHost string, consulPort int) (DiscoveryClient, e
 	}, err
 }
 
-func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
-	// 服務實例的MetaData，呼叫註冊函數
-	err := consulClient.client.Register(&api.AgentServiceRegistration{
+func (consulClient *KitDiscoverClient) RegisterHTTP(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
+	return consulClient.Register(&api.AgentServiceRegistration{
 		ID:      instanceId,
 		Name:    serviceName,
 		Address: instanceHost,
@@ -52,11 +51,31 @@ func (consulClient *KitDiscoverClient) Register(serviceName, instanceId, healthC
 			Interval:                       "15s",
 		},
 	})
+}
+
+func (consulClient *KitDiscoverClient) RegisterGRPC(serviceName, instanceId, healthCheckUrl string, instanceHost string, instancePort int, meta map[string]string, logger *log.Logger) bool {
+	return consulClient.Register(&api.AgentServiceRegistration{
+		ID:      instanceId,
+		Name:    serviceName,
+		Address: instanceHost,
+		Port:    instancePort,
+		Meta:    meta,
+		Check: &api.AgentServiceCheck{
+			DeregisterCriticalServiceAfter: "30s",
+			GRPC:                           instanceHost + ":" + strconv.Itoa(instancePort) + healthCheckUrl,
+			Interval:                       "15s",
+		},
+	})
+}
+
+func (consulClient *KitDiscoverClient) Register(config *api.AgentServiceRegistration) bool {
+	// 服務實例的MetaData，呼叫註冊函數
+	err := consulClient.client.Register(config)
 	if err != nil {
-		log.Printf("Register Service: %s Error, instanceId %s \n", serviceName, instanceId)
+		log.Printf("Register Service: %s Error, instanceId %s \n", config.serviceName, config.instanceId)
 		return false
 	}
-	log.Printf("Register Service: %s Success, instanceId %s \n", serviceName, instanceId)
+	log.Printf("Register Service: %s Success, instanceId %s \n", config.serviceName, config.instanceId)
 	return true
 }
 
