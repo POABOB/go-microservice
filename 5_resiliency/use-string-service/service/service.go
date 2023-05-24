@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"use-string-service/config"
 
-	loadbalance "use-string-service/load-balance"
+	loadbalance "github.com/POABOB/go-microservice/common/load-balance"
 
 	"github.com/POABOB/go-microservice/common/discover"
 	"github.com/afex/hystrix-go/hystrix"

@@ -12,10 +12,11 @@ import (
 
 	"use-string-service/config"
 	"use-string-service/endpoint"
-	loadbalance "use-string-service/load-balance"
 	"use-string-service/plugins"
 	"use-string-service/service"
 	"use-string-service/transport"
+
+	loadbalance "github.com/POABOB/go-microservice/common/load-balance"
 
 	"github.com/POABOB/go-microservice/common/discover"
 	"github.com/go-kit/kit/circuitbreaker"
