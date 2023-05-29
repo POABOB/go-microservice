@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - $PWD/extra/grafana_db:/var/lib/grafana grafana/grafana
+  consul1:
+    # 鏡像名稱
+    image: consul
+    # 容器名稱
+    container_name: node1
+    # 開啟後運行指令，開啟server模式 
+    # -client=0.0.0.0 是 UI 介面的 IP
+    # -bind=172.0.0.1 是 consul 集群的 IP
+    command: agent -dev -bootstrap-expect=1 -node=node1 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1
+    ports:
+      - 8500:8500
+      - 8600:8600/tcp
+      - 8600:8600/udp
+    hostname: consulserver
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
