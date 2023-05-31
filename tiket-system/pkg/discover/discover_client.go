@@ -22,6 +22,7 @@ type DiscoveryClientInstance struct {
 type DiscoveryClient interface {
 	/***
 	 * 服務註冊interface
+	 *
 	 * @param serviceName		服務名稱
 	 * @param instanceID		實例 ID
 	 * @param instanceHost		實例 Host
@@ -31,20 +32,28 @@ type DiscoveryClient interface {
 	 * @param meta				實例 MetaData
 	 * @param tags				實例 tags 標記
 	 * @param logger			logger
+	 *
+	 * @return bool
 	 **/
 	Register(serviceName, instanceID, instanceHost, healthCheckURL string, instancePort, instanceWeight int, meta map[string]string, tags []string, logger *log.Logger) bool
 
 	/***
 	 * 服務註銷interface
+	 *
 	 * @param instanceID		實例 ID
 	 * @param logger			logger
+	 *
+	 * @return bool
 	 **/
 	DeRegister(instanceID string, logger *log.Logger) bool
 
 	/***
 	 * 服務發現interface
+	 *
 	 * @param serviceName		服務名稱
 	 * @param logger			logger
+	 *
+	 * @return []*common.ServiceInstance
 	 **/
 	DiscoverServices(serviceName string, logger *log.Logger) []*common.ServiceInstance
 }
