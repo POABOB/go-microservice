@@ -1,0 +1,20 @@
+http:
+  host: 10.123.12.27
+  port: 9001
+
+rpc:
+  host: localhost
+  port: 10001
+
+discover:
+  Host: 10.123.12.27
+  port: 8500
+  instanceId: user-service-localhost
+  serviceName: user-service
+  weight: 10
+
+# 不會用到
+# config:
+#   id: config-service
+#   profile: "dev"
+#   label: "master"

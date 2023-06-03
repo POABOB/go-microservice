@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package user;
+
+service User {
+    // 一般登入註冊
+    rpc Login(UserLoginRequest) returns (UserLoginResponse){}
+    rpc Register(UserRegisterRequest) returns (UserRegisterResponse){}
+    // Google 登入註冊
+    rpc LoginWithGoogle(UserLoginRequest) returns (UserLoginResponse){}
+    rpc LoginWithGoogleCallback(UserLoginRequest) returns (UserLoginResponse){}
+    // HealthCheck
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse){}
+}
+
+message UserLoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message UserLoginResponse {
+    bool result = 1;
+    int64 userId = 2;
+    string token = 3;
+    string err = 4;
+}
+
+message UserRegisterRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+    string passconf = 4;
+    string birthday = 5;
+    string sex = 6;
+    repeated string preferedLocation = 7;
+}
+
+message UserRegisterResponse {
+    bool result = 1;
+    int64 userId = 2;
+    string token = 3;
+    string err = 4;
+}
+
+message HealthCheckRequest {}
+message HealthCheckResponse {
+    bool result = 1;
+    string err = 2;
+}
