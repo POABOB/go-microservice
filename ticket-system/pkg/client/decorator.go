@@ -13,6 +13,7 @@ import (
 	conf "github.com/POABOB/go-microservice/ticket-system/pkg/config"
 	"github.com/POABOB/go-microservice/ticket-system/pkg/discover"
 	"github.com/POABOB/go-microservice/ticket-system/pkg/loadbalance"
+	"go.uber.org/zap"
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
@@ -30,7 +31,7 @@ var (
 	ErrRPCService = errors.New("no rpc service")
 )
 
-var defaultLoadBalance loadbalance.LoadBalance = &loadbalance.RandomLoadBalance{}
+var DefaultLoadBalance loadbalance.LoadBalance = &loadbalance.RandomLoadBalance{}
 
 type ClientManager interface {
 	DecoratorInvoke(path string, hystrixName string, tracer opentracing.Tracer,
@@ -39,7 +40,7 @@ type ClientManager interface {
 
 type DefaultClientManager struct {
 	serviceName     string
-	logger          *log.Logger
+	logger          *zap.Logger
 	discoveryClient discover.DiscoveryClient
 	loadBalance     loadbalance.LoadBalance
 	after           []InvokerAfterFunc
@@ -50,8 +51,17 @@ type InvokerAfterFunc func() (err error)
 
 type InvokerBeforeFunc func() (err error)
 
+func NewDefaultClientManager(serviceName string, lb loadbalance.LoadBalance) *DefaultClientManager {
+	return &DefaultClientManager{
+		serviceName:     serviceName,
+		logger:          discover.Logger,
+		discoveryClient: discover.ConsulService,
+		loadBalance:     lb,
+	}
+}
+
 // 服務調用的裝飾器
-func (manager *DefaultClientManager) DecoratorInvoke(path string, hystrixName string,
+func (manager DefaultClientManager) DecoratorInvoke(path string, hystrixName string,
 	tracer opentracing.Tracer, ctx context.Context, inputVal interface{}, outVal interface{}) (err error) {
 	// Client 發起前的 callback
 	for _, fn := range manager.before {
