@@ -3,14 +3,14 @@ package discover
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/POABOB/go-microservice/ticket-system/pkg/bootstrap"
 	"github.com/POABOB/go-microservice/ticket-system/pkg/common"
 	"github.com/POABOB/go-microservice/ticket-system/pkg/loadbalance"
+	"github.com/POABOB/go-microservice/ticket-system/user-service/config"
+	"go.uber.org/zap"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -18,25 +18,24 @@ import (
 var (
 	ConsulService        DiscoveryClient                                             // DiscoveryClient 實例
 	LoadBalance          loadbalance.LoadBalance                                     // LoadBalance 實例
-	Logger               *log.Logger                                                 // Looger 實例
+	Logger               *zap.Logger                                                 // Looger 實例
 	ErrNoInstanceExisted error                   = errors.New("no available client") // 錯誤：沒有實例
 )
 
 // 建構子
 func init() {
-	fmt.Println(bootstrap.DiscoverConfig.Host, bootstrap.DiscoverConfig.Port)
 	// Discover 初始化
 	ConsulService = NewDiscoverConsulClient(bootstrap.DiscoverConfig.Host, bootstrap.DiscoverConfig.Port)
 	LoadBalance = new(loadbalance.WeightRoundRobinLoadBalance)
-	Logger = log.New(os.Stderr, "", log.LstdFlags)
+	Logger = config.Logger
 }
 
 // 健檢
 func CheckHealth(writer http.ResponseWriter, _ *http.Request) {
-	Logger.Println("Health check!")
+	Logger.Info("Health check!")
 	_, err := fmt.Fprintln(writer, "Server is OK!")
 	if err != nil {
-		Logger.Println(err)
+		Logger.Error(fmt.Sprintf("%v", err))
 	}
 }
 
@@ -45,7 +44,7 @@ func DiscoveryService(serviceName string) (*common.ServiceInstance, error) {
 	instances := ConsulService.DiscoverServices(serviceName, Logger)
 
 	if len(instances) < 1 {
-		Logger.Printf("no available client for %s.", serviceName)
+		Logger.Error(fmt.Sprintf("no available client for %s.", serviceName))
 		return nil, ErrNoInstanceExisted
 	}
 	return LoadBalance.SelectService(instances)
@@ -69,11 +68,11 @@ func Register() {
 		map[string]string{
 			"rpcPort": strconv.Itoa(bootstrap.RpcConfig.Port),
 		}, nil, Logger) {
-		Logger.Printf("register service %s failed.", bootstrap.DiscoverConfig.ServiceName)
+		Logger.Error(fmt.Sprintf("register service %s failed.", bootstrap.DiscoverConfig.ServiceName))
 		// 註冊失敗，關閉
 		panic(0)
 	}
-	Logger.Printf(bootstrap.DiscoverConfig.ServiceName+"-service for service %s success.", bootstrap.DiscoverConfig.ServiceName)
+	Logger.Info(fmt.Sprintf("%s-service for service %s success.", bootstrap.DiscoverConfig.ServiceName, bootstrap.DiscoverConfig.ServiceName))
 }
 
 // 服務註銷
@@ -90,7 +89,7 @@ func Deregister() {
 	}
 
 	if !ConsulService.DeRegister(instanceId, Logger) {
-		Logger.Printf("deregister for service %s failed.", bootstrap.DiscoverConfig.ServiceName)
+		Logger.Error(fmt.Sprintf("deregister for service %s failed.", bootstrap.DiscoverConfig.ServiceName))
 		panic(0)
 	}
 }

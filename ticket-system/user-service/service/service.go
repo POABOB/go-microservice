@@ -2,48 +2,81 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/POABOB/go-microservice/ticket-system/pb/user"
+	localconfig "github.com/POABOB/go-microservice/ticket-system/user-service/config"
+	"github.com/gookit/validate"
 )
 
-// pb.UserServer 已經有 interface 了
-type UserService struct{}
-
+// NewService returns a naïve, stateless implementation of Service.
 func NewService() pb.UserServer {
 	return UserService{}
 }
 
-func (s UserService) Login(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
-	// userEntity := model.NewUserModel()
-	// res, err := userEntity.CheckUser(username, password)
-	// if err != nil {
-	// 	log.Printf("UserEntity.CreateUser, err : %v", err)
-	// 	return 0, err
-	// }
-	// return res.UserId, nil
+type UserService struct{}
 
-	return &pb.UserLoginResponse{}, nil
+func (s UserService) Login(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
+	v := validate.Struct(in)
+	if !v.Validate() {
+		localconfig.Logger.Error(fmt.Sprint("%v", v.Errors))
+		return nil, v.Errors.OneError()
+	}
+
+	var resp pb.UserLoginResponse
+	// do something ...
+
+	return &resp, nil
 }
 
 func (s UserService) Register(ctx context.Context, in *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
+	v := validate.Struct(in)
+	if !v.Validate() {
+		localconfig.Logger.Error(fmt.Sprint("%v", v.Errors))
+		return nil, v.Errors.OneError()
+	}
+
 	var resp pb.UserRegisterResponse
+	// do something ...
+
 	return &resp, nil
 }
 
 func (s UserService) LoginWithGoogle(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
+	v := validate.Struct(in)
+	if !v.Validate() {
+		localconfig.Logger.Error(fmt.Sprint("%v", v.Errors))
+		return nil, v.Errors.OneError()
+	}
+
 	var resp pb.UserLoginResponse
+	// do something ...
+
 	return &resp, nil
 }
 
 func (s UserService) LoginWithGoogleCallback(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
+	v := validate.Struct(in)
+	if !v.Validate() {
+		localconfig.Logger.Error(fmt.Sprint("%v", v.Errors))
+		return nil, v.Errors.OneError()
+	}
+
 	var resp pb.UserLoginResponse
+	// do something ...
+
 	return &resp, nil
 }
 
 func (s UserService) HealthCheck(ctx context.Context, in *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
-	resp := &pb.HealthCheckResponse{Result: true, Err: ""}
-	return resp, nil
-}
+	v := validate.Struct(in)
+	if !v.Validate() {
+		localconfig.Logger.Error(fmt.Sprint("%v", v.Errors))
+		return nil, v.Errors.OneError()
+	}
 
-// ServiceMiddleware define service middleware
-type ServiceMiddleware func(pb.UserServer) pb.UserServer
+	var resp pb.HealthCheckResponse
+	// do something ...
+
+	return &resp, nil
+}

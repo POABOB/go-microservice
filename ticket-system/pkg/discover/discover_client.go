@@ -1,10 +1,10 @@
 package discover
 
 import (
-	"log"
 	"sync"
 
 	"github.com/POABOB/go-microservice/ticket-system/pkg/common"
+	"go.uber.org/zap"
 
 	"github.com/go-kit/kit/sd/consul"
 	"github.com/hashicorp/consul/api"
@@ -35,7 +35,7 @@ type DiscoveryClient interface {
 	 *
 	 * @return bool
 	 **/
-	Register(serviceName, instanceID, instanceHost, healthCheckURL string, instancePort, instanceWeight int, meta map[string]string, tags []string, logger *log.Logger) bool
+	Register(serviceName, instanceID, instanceHost, healthCheckURL string, instancePort, instanceWeight int, meta map[string]string, tags []string, logger *zap.Logger) bool
 
 	/***
 	 * 服務註銷interface
@@ -45,7 +45,7 @@ type DiscoveryClient interface {
 	 *
 	 * @return bool
 	 **/
-	DeRegister(instanceID string, logger *log.Logger) bool
+	DeRegister(instanceID string, logger *zap.Logger) bool
 
 	/***
 	 * 服務發現interface
@@ -55,5 +55,5 @@ type DiscoveryClient interface {
 	 *
 	 * @return []*common.ServiceInstance
 	 **/
-	DiscoverServices(serviceName string, logger *log.Logger) []*common.ServiceInstance
+	DiscoverServices(serviceName string, logger *zap.Logger) []*common.ServiceInstance
 }

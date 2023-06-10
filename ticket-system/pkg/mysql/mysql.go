@@ -1,8 +1,9 @@
 package mysql
 
 import (
-	"log"
+	"fmt"
 
+	conf "github.com/POABOB/go-microservice/ticket-system/pkg/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gohouse/gorose/v2"
 )
@@ -13,9 +14,6 @@ var (
 )
 
 func InitMysql(hostMysql, portMysql, userMysql, pwdMysql, dbMysql string) {
-	log.Println(userMysql)
-	log.Println(dbMysql)
-
 	DbConfig := gorose.Config{
 		// Default database configuration
 		Driver: "mysql",                                                                                                              // Db 驅動 (mysql,sqlite,postgres,oracle,mssql)
@@ -28,7 +26,7 @@ func InitMysql(hostMysql, portMysql, userMysql, pwdMysql, dbMysql string) {
 	}
 
 	if engin, err = gorose.Open(&DbConfig); err != nil {
-		log.Println(err)
+		conf.Logger.Error(fmt.Sprintf("%v", err))
 		return
 	}
 }

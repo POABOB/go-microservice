@@ -2,19 +2,55 @@ syntax = "proto3";
 
 package user;
 
+// http 
+import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+
 service User {
     // 一般登入註冊
-    rpc Login(UserLoginRequest) returns (UserLoginResponse){}
-    rpc Register(UserRegisterRequest) returns (UserRegisterResponse){}
+    rpc Login(UserLoginRequest) returns (UserLoginResponse){
+        option (google.api.http) = {
+            // All fields (In) are query parameters of the http request unless otherwise specified
+            post: "/login"
+        };
+    }
+    rpc Register(UserRegisterRequest) returns (UserRegisterResponse){
+        option (google.api.http) = {
+            // All fields (In) are query parameters of the http request unless otherwise specified
+            post: "/register"
+        };
+    }
     // Google 登入註冊
-    rpc LoginWithGoogle(UserLoginRequest) returns (UserLoginResponse){}
-    rpc LoginWithGoogleCallback(UserLoginRequest) returns (UserLoginResponse){}
+    rpc LoginWithGoogle(UserLoginRequest) returns (UserLoginResponse){
+        option (google.api.http) = {
+            // All fields (In) are query parameters of the http request unless otherwise specified
+            get: "/loginWithGoogle"
+
+            // additional_bindings {
+            //     get: "/health/{ping}"
+            //     // All other fields (In) are located in the body of the http/json request
+            //     body: "*"
+            // }
+        };
+    }
+    rpc LoginWithGoogleCallback(UserLoginRequest) returns (UserLoginResponse){
+        option (google.api.http) = {
+            // All fields (In) are query parameters of the http request unless otherwise specified
+            get: "/loginWithGoogleCallback"
+        };
+    }
     // HealthCheck
-    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse){}
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse){
+        option (google.api.http) = {
+            // All fields (In) are query parameters of the http request unless otherwise specified
+            get: "/health"
+        };
+    }
 }
 
 message UserLoginRequest {
+    // @gotags: validate:"required|min_len:1|max_len:256"
     string username = 1;
+    // @gotags: validate:"required|min_len:1|max_len:256"
     string password = 2;
 }
 
@@ -26,12 +62,19 @@ message UserLoginResponse {
 }
 
 message UserRegisterRequest {
+    // @gotags: validate:"required|min_len:1|max_len:256"
     string username = 1;
+    // @gotags: validate:"required|email|min_len:1|max_len:256"
     string email = 2;
+    // @gotags: validate:"required|min_len:1|max_len:256"
     string password = 3;
+    // @gotags: validate:"required|min_len:1|max_len:256"
     string passconf = 4;
+    // @gotags: validate:"required|max_len:10"
     string birthday = 5;
+    // @gotags: validate:"required|min_len:1|max_len:10"
     string sex = 6;
+    // @gotags: validate:"-"
     repeated string preferedLocation = 7;
 }
 

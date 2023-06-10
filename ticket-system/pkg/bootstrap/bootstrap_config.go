@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Init() {
+func init() {
 	// 設定有預設值的 Env
 	viper.AutomaticEnv()
 	// 設定 Bootstrap 文件

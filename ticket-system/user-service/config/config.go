@@ -1,58 +1,66 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/POABOB/go-microservice/ticket-system/pkg/bootstrap"
+	"github.com/POABOB/go-microservice/ticket-system/pkg/common"
+	conf "github.com/POABOB/go-microservice/ticket-system/pkg/config"
 
-	"github.com/go-kit/log"
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 	_ "github.com/openzipkin/zipkin-go/reporter/recorder"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// const (
-// 	kConfigType = "CONFIG_TYPE"
-// )
+const (
+	kConfigType = "CONFIG_TYPE"
+)
 
 var ZipkinTracer *zipkin.Tracer
-var Logger log.Logger
+var (
+	Logger *zap.Logger
+	Level  zapcore.Level
+	Dev    bool
+)
 
 func init() {
-	Logger = log.NewLogfmtLogger(os.Stderr)
-	Logger = log.With(Logger, "ts", log.DefaultTimestampUTC)
-	Logger = log.With(Logger, "caller", log.DefaultCaller)
+	Level = zap.InfoLevel
+	if bootstrap.ConfigServerConfig.Profile == "dev" {
+		Dev = true
+		Level = zap.DebugLevel
+	}
+	// 設定 Logger
+	Logger = common.NewLogger(common.SetAppName(bootstrap.DiscoverConfig.ServiceName), common.SetDevelopment(Dev), common.SetLevel(Level), common.SetErrorFileName("error.log"))
+
 	viper.AutomaticEnv()
-	bootstrap.Init()
+	initDefault()
 
-	// TODO
-	// initDefault()
+	if err := conf.LoadConsulConfig(); err != nil {
+		Logger.Error(fmt.Sprintf("Fail to load remote consul config %v", err))
+	}
 
-	// if err := conf.LoadRemoteConfig(); err != nil {
-	// 	Logger.Log("Fail to load remote config", err)
-	// }
+	// 獲取 Mysql Config
+	if err := conf.Sub("mysql", &conf.MysqlConfig); err != nil {
+		Logger.Error(fmt.Sprintf("Fail to parse mysql %v", err))
+	}
+	// 獲取 Trace Config
+	if err := conf.Sub("trace", &conf.TraceConfig); err != nil {
+		Logger.Error(fmt.Sprintf("Fail to parse trace %v", err))
+	}
 
-	// if err := conf.Sub("mysql", &conf.MysqlConfig); err != nil {
-	// 	Logger.Log("Fail to parse mysql", err)
-	// }
-
-	// if err := conf.Sub("trace", &conf.TraceConfig); err != nil {
-	// 	Logger.Log("Fail to parse trace", err)
-	// }
-
-	TraceHost := "127.0.0.1"
-	TracePort := 9411
-	TraceUrl := "/api/v2/spans"
-	zipkinUrl := "http://" + TraceHost + ":" + strconv.Itoa(TracePort) + TraceUrl
-	Logger.Log("zipkin url", zipkinUrl)
+	zipkinUrl := "http://" + conf.TraceConfig.Host + ":" + conf.TraceConfig.Port + conf.TraceConfig.Url
+	Logger.Info(fmt.Sprintf("zipkin url: %v", zipkinUrl))
 	initTracer(zipkinUrl)
 }
 
-// func initDefault() {
-// 	viper.SetDefault(kConfigType, "yaml")
-// }
+func initDefault() {
+	viper.SetDefault(kConfigType, "yaml")
+}
 
 func initTracer(zipkinURL string) {
 	var (
@@ -60,16 +68,17 @@ func initTracer(zipkinURL string) {
 		useNoopTracer = zipkinURL == ""
 		reporter      = zipkinhttp.NewReporter(zipkinURL)
 	)
-	//defer reporter.Close()
+	// defer reporter.Close()
+
 	zEP, _ := zipkin.NewEndpoint(bootstrap.DiscoverConfig.ServiceName, strconv.Itoa(bootstrap.HttpConfig.Port))
-	ZipkinTracer, err = zipkin.NewTracer(
+	if ZipkinTracer, err = zipkin.NewTracer(
 		reporter, zipkin.WithLocalEndpoint(zEP), zipkin.WithNoopTracer(useNoopTracer),
-	)
-	if err != nil {
-		Logger.Log("err", err)
+	); err != nil {
+		Logger.Error(fmt.Sprintf("err %v", err))
 		os.Exit(1)
 	}
+
 	if !useNoopTracer {
-		Logger.Log("tracer", "Zipkin", "type", "Native", "URL", zipkinURL)
+		Logger.Info(fmt.Sprintf("tracer: Zipkin, type: Native, URL: %v", zipkinURL))
 	}
 }

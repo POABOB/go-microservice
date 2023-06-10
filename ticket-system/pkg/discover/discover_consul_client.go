@@ -2,10 +2,10 @@ package discover
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/POABOB/go-microservice/ticket-system/pkg/common"
+	"go.uber.org/zap"
 
 	"github.com/go-kit/kit/sd/consul"
 	"github.com/hashicorp/consul/api"
@@ -33,7 +33,7 @@ func NewDiscoverConsulClient(consulHost string, consulPort int) *DiscoveryClient
 }
 
 // 服務註冊
-func (consulClient *DiscoveryClientInstance) Register(serviceName, instanceId, instanceHost, healthCheckUrl string, instancePort, instanceWeight int, meta map[string]string, tags []string, logger *log.Logger) bool {
+func (consulClient *DiscoveryClientInstance) Register(serviceName, instanceId, instanceHost, healthCheckUrl string, instancePort, instanceWeight int, meta map[string]string, tags []string, logger *zap.Logger) bool {
 	// 服務實例的MetaData，呼叫註冊函數
 	err := consulClient.client.Register(&api.AgentServiceRegistration{
 		ID:      instanceId,
@@ -51,42 +51,36 @@ func (consulClient *DiscoveryClientInstance) Register(serviceName, instanceId, i
 			Interval:                       "15s",
 		},
 	})
+
 	if err != nil {
-		if logger != nil {
-			log.Printf("Register Service: %s Failed, instanceId %s, Service Host:Port %s:%d\n", serviceName, instanceId, instanceHost, instancePort)
-		}
+		logger.Error(fmt.Sprintf("Register Service: %s Failed, instanceId %s, Service Host:Port %s:%d", serviceName, instanceId, instanceHost, instancePort))
 		return false
 	}
-	if logger != nil {
-		log.Printf("Register Service: %s Success, instanceId %s, Service Host:Port %s:%d\n", serviceName, instanceId, instanceHost, instancePort)
-	}
 
+	logger.Info(fmt.Sprintf("Register Service: %s Success, instanceId %s, Service Host:Port %s:%d", serviceName, instanceId, instanceHost, instancePort))
 	return true
 }
 
 // 服務註銷
-func (consulClient *DiscoveryClientInstance) DeRegister(instanceId string, logger *log.Logger) bool {
+func (consulClient *DiscoveryClientInstance) DeRegister(instanceId string, logger *zap.Logger) bool {
 	// 服務實例的MetaData，只需要實例ID，呼叫註銷函數
 	err := consulClient.client.Deregister(&api.AgentServiceRegistration{
 		ID: instanceId,
 	})
 	if err != nil {
-		if logger != nil {
-			log.Printf("Deregister Service Failed, instanceId %s\n", instanceId)
-		}
+		logger.Error(fmt.Sprintf("Deregister Service Failed, instanceId %s", instanceId))
 		return false
 	}
-	if logger != nil {
-		log.Printf("Deregister Service Success, instanceId %s\n", instanceId)
-	}
 
+	logger.Info(fmt.Sprintf("Deregister Service Success, instanceId %s", instanceId))
 	return true
 }
 
 // 服務發現
-func (consulClient *DiscoveryClientInstance) DiscoverServices(serviceName string, logger *log.Logger) []*common.ServiceInstance {
+func (consulClient *DiscoveryClientInstance) DiscoverServices(serviceName string, logger *zap.Logger) []*common.ServiceInstance {
 	//  cache 查找服務資訊
 	instanceList, ok := consulClient.instancesMap.Load(serviceName)
+	logger.Info(fmt.Sprintf("%v", instanceList))
 	if ok {
 		return instanceList.([]*common.ServiceInstance)
 	}
@@ -121,10 +115,10 @@ func (consulClient *DiscoveryClientInstance) DiscoverServices(serviceName string
 					consulClient.instancesMap.Store(serviceName, []*common.ServiceInstance{})
 				}
 
-				var healthServices []interface{}
+				var healthServices []*common.ServiceInstance
 				for _, service := range v {
 					if service.Checks.AggregatedStatus() == api.HealthPassing {
-						healthServices = append(healthServices, service.Service)
+						healthServices = append(healthServices, newServiceInstance(service.Service))
 					}
 				}
 				consulClient.instancesMap.Store(serviceName, healthServices)
@@ -138,9 +132,7 @@ func (consulClient *DiscoveryClientInstance) DiscoverServices(serviceName string
 	entries, _, err := consulClient.client.Service(serviceName, "", false, nil)
 	if err != nil {
 		consulClient.instancesMap.Store(serviceName, []*common.ServiceInstance{})
-		if logger != nil {
-			logger.Printf("Discover Service: %s Error!\n", serviceName)
-		}
+		logger.Error(fmt.Sprintf("Discover Service: %s Error!", serviceName))
 		return nil
 	}
 
@@ -170,5 +162,4 @@ func newServiceInstance(service *api.AgentService) *common.ServiceInstance {
 		GrpcPort: rpcPort,
 		Weight:   service.Weights.Passing,
 	}
-
 }

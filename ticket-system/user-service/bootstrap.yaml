@@ -1,20 +1,20 @@
-http:
-  host: 10.123.12.27
-  port: 9001
 
-rpc:
-  host: localhost
+http:
+  host: docker.for.mac.localhost
   port: 10001
 
+rpc:
+  host: docker.for.mac.localhost
+  port: 11001
+
 discover:
-  Host: 10.123.12.27
+  Host: localhost
   port: 8500
-  instanceId: user-service-localhost
-  serviceName: user-service
+  instanceId: user-service
+  serviceName: user
   weight: 10
 
-# 不會用到
-# config:
-#   id: config-service
-#   profile: "dev"
-#   label: "master"
+config:
+  id: config
+  profile: "dev"
+  label: "master"

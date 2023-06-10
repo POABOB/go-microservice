@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package rapidbuying;
+
+service RapidBuying {
+    rpc rapidBuying(RapidBuyingRequest) returns (RapidBuyingResponse){}
+}
+
+message RapidBuyingRequest {
+    int64 Id = 1;
+    string Source = 2;
+    string AuthCode = 3;
+    string SecTime = 4;
+    string Nance = 5;
+    int64 UserId = 6;
+    string UserAuthSign = 7;
+    int64 AccessTime = 8;
+    string ClientAddr = 9;
+    string ClientRefence = 10;
+}
+
+message RapidBuyingResponse {
+    int64 Id = 1;
+    int64 UserId = 2;
+    string Token = 3;
+    int64 TokenTime = 4;
+    int64 Code = 5;
+}
